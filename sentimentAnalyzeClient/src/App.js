@@ -1,4 +1,5 @@
 import './bootstrap.min.css';
+// eslint-disable-next-line
 import './App.css';
 import EmotionTable from './EmotionTable.js';
 import React from 'react';
@@ -45,19 +46,25 @@ class App extends React.Component {
     }
     ret = axios.get(url);
     ret.then((response)=>{
-
+      console.log(response);  
       //Include code here to check the sentiment and fomrat the data accordingly
-
-      this.setState({sentimentOutput:response.data});
-      let output = response.data;
-      if(response.data === "positive") {
-        output = <div style={{color:"green",fontSize:20}}>{response.data}</div>
-      } else if (response.data === "negative"){
-        output = <div style={{color:"red",fontSize:20}}>{response.data}</div>
-      } else {
-        output = <div style={{color:"orange",fontSize:20}}>{response.data}</div>
-      }
-      this.setState({sentimentOutput:output});
+      if (response.statusText === "OK") {
+          let output = "";
+          // Clear last 
+          this.setState({sentimentOutput: output});
+            if(response.data.label === "positive") {
+                output = <div style={{color:"green",fontSize:20}}>Positive with score: {response.data.score}</div>
+            } else if (response.data.label === "negative"){
+                output = <div style={{color:"red",fontSize:20}}>Negative with score: {response.data.score}</div>
+            } else {
+                output = <div style={{color:"orange",fontSize:20}}>Neutral with score: {response.data.score}</div>
+            }
+            this.setState({sentimentOutput:output});
+    }}).catch(err => {
+        console.log(err);
+        console.log(err.response);
+        let output = err.response.data.Error;
+        this.setState({sentimentOutput:output});
     });
   }
 
@@ -72,8 +79,17 @@ class App extends React.Component {
     }
     ret = axios.get(url);
 
+    // // Test only. Should render a table.
+    // let response = {'data':{'sad':-0.3, 'happy': 0.25, 'eNgry': 0.89}};
+    // this.setState({sentimentOutput:<EmotionTable emotions={response.data}/>});
+
     ret.then((response)=>{
       this.setState({sentimentOutput:<EmotionTable emotions={response.data}/>});
+  }).catch(err => {
+        console.log(err);
+        console.log(err.response);
+        let output = err.response.data.Error;
+        this.setState({sentimentOutput:output});
   });
   }
   
